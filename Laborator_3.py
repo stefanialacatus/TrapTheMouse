@@ -159,7 +159,7 @@ print(result)
 
 #exercitiul 11
 def ex_11(list):
-    return sorted(list, key=lambda x: x[1][2] if len(x[1]) > 2 else '')
+    return sorted(list, key=lambda x: x[1][2])
 
 tuple = [('abc', 'bcd'), ('abc', 'zza')]
 sortat = ex_11(tuple)
@@ -168,15 +168,15 @@ print(sortat)
 
 #exercitiul 12
 def ex_12(words):
-    rhymed_words = {}
+    rhymed_groups = {}
     for word in words:
         ult_silaba = word[-2:] if len(word) >= 2 else word
-        if ult_silaba not in rhymed_words:
-            rhymed_words[ult_silaba] = []
-        rhymed_words[ult_silaba].append(word)
-    return list(rhymed_words.values())
+        if ult_silaba not in rhymed_groups:
+            rhymed_groups[ult_silaba] = []
+        rhymed_groups[ult_silaba].append(word)
+    return list(rhymed_groups.values())
 
-result = ex_12(['ana', 'banana', 'carte', 'arme', 'parte'])
+result = ex_12(['ana', 'banana', 'carte', 'arme', 'parte', 'teme'])
 print("Exercitiul 12: ")
 print(result)
 
