@@ -2,7 +2,7 @@
 def ex_1(n):
     list = [0, 1]
     fib_list = [1]
-    for i in range(2, n):
+    for i in range(2, n+1):
         next_fib = list[i-1] + list[i-2]
         list.append(next_fib)
         fib_list.append(next_fib)
@@ -116,7 +116,7 @@ print("Exercitiul 7: %s, %s" % ex_7(nr))
 
 
 #exercitiul 9
-def spectators_who_cannot_see(matrix):
+def ex_9(matrix):
     rows = len(matrix)
     cols = len(matrix[0]) if rows > 0 else 0
     locuri_blocate = []
@@ -139,7 +139,7 @@ stadium = [
     [6, 6, 7, 6, 7, 5]
 ]
 
-result = spectators_who_cannot_see(stadium)
+result = ex_9(stadium)
 print("Exercitiul 9: ")
 print(result)
 
