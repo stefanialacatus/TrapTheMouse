@@ -34,6 +34,7 @@ print(stack.pop())
 print(stack.pop())   
 print(stack.peek())	
 
+
 #exercitiul 2
 class Queue:
     def __init__(self):
@@ -46,7 +47,7 @@ class Queue:
         if len(self.queue) == 0:
             return None
         item = self.queue[0] 
-        self.queue = self.queue[1:] 
+        self.queue = self.queue[1:]
         return item
 
     def peek(self):
@@ -71,18 +72,19 @@ print(queue.pop())
 print(queue.pop())   
 print(queue.peek())  	
 
+
 #exercitiul 3
 class Matrix:
-    def __init__(self, rows, cols, fill=0):
+    def __init__(self, rows, cols, val=0):
         self.rows = rows
         self.cols = cols
-        self.data = [[fill for _ in range(cols)] for _ in range(rows)]
+        self.data = [[val for _ in range(cols)] for _ in range(rows)]
 
     def get(self, row, col):
         return self.data[row][col]
 
-    def set(self, row, col, value):
-        self.data[row][col] = value
+    def set(self, row, col, val):
+        self.data[row][col] = val
 
     def transpose(self):
         transposed = Matrix(self.cols, self.rows)
