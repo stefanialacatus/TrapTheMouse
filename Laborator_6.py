@@ -61,8 +61,9 @@ class Triangle(Shape):
 
 print("Exercitiul 1:")
 triunghi1 = Triangle("red", 10, 11, 12)
-print(triunghi1.area())
-print(triunghi1.perimeter())
+circle1 = Circle("blue", 5)
+print(f"Aria triunghiului este {triunghi1.area()}")
+print(f"Perimetrul cercului este {circle1.perimeter()}")
 print()
 
 #exercitiul 2
@@ -122,7 +123,7 @@ class CheckingAccount(Account):
             self.amount -= amount + self.fee
 
     def deposit(self, amount):
-        self.amount += amount - self.fee
+        self.amount += amount
 
     def transfer(self, account, amount):
         if self.amount < amount + self.fee:
@@ -169,7 +170,7 @@ class Car(Vehicle):
         return km / self.fuel
     
     def towing_capacity(self):
-        return 1000
+        return 100
     
     def refuel(self, fuel):
         self.fuel += fuel
@@ -286,8 +287,11 @@ class Engineer(Employee):
         return super().__str__() + ", Skills: " + str(self.skills)
     
     def income(self):
-        return self.salary
+        return self.salary + len(self.skills) * 100
     
+    def addSkill(self, skill):
+        self.skills.append(skill)
+
     def startProject(self, project):
         self.projects.append(project)
 
@@ -322,6 +326,7 @@ engineer1.startProject("Project 1")
 engineer1.startProject("Project 2")
 print("Exercitiul 4:")
 print(engineer1)
+engineer1.addSkill("C++")
 print("Dave's projects: ")
 engineer1.showProjects()
 engineer1.finishProject("Project 1")
@@ -424,13 +429,16 @@ class LibraryItem:
         self.creator = creator 
         self.publication_year = publication_year
         self.is_checked_out = False
+        self.score = 0
     
     def check_out(self):
         if not self.is_checked_out:
             self.is_checked_out = True
+            self.score += 1
             return f"{self.title} has been checked out."
         else:
             return f"{self.title} is already checked out."
+
 
     def return_item(self):
         if self.is_checked_out:
@@ -439,17 +447,26 @@ class LibraryItem:
         else:
             return f"{self.title} wasn't checked out."
 
+    def getPopularity(self):
+        if(self.score < 1):
+            return "Not popular"
+        elif(self.score < 3 and self.score >= 2):
+            return "Medium popularity"
+        elif(self.score >= 3):
+            return "Very popular"
+
     def display_info(self):
-        return f"Title: {self.title}, Creator: {self.creator}, Year: {self.publication_year}, Checked out: {self.is_checked_out}"
+        return f"Title: {self.title}, Creator: {self.creator}, Year: {self.publication_year}, Popularity: {self.getPopularity()}"
 
 
 class Book(LibraryItem):
-    def __init__(self, title, author, publication_year, pages):
+    def __init__(self, title, author, publication_year, pages, genre):
         super().__init__(title, author, publication_year)
         self.pages = pages
+        self.genre = genre
     
     def display_info(self):
-        return f"{super().display_info()}, Nu,mber of pages: {self.pages}"
+        return f"{super().display_info()}, Genre: {self.genre}, Number of pages: {self.pages}, Popularity: {self.getPopularity()}"
 
 
 class DVD(LibraryItem):
@@ -459,27 +476,38 @@ class DVD(LibraryItem):
         self.genre = genre
     
     def display_info(self):
-        return f"{super().display_info()}, Duration: {self.duration} minutes, Genre: {self.genre}"
+        return f"{super().display_info()}, Duration: {self.duration} minutes, Genre: {self.genre}, Popularity: {self.getPopularity()}"
 
 
 class Magazine(LibraryItem):
-    def __init__(self, title, publisher, publication_year, issue_number):
+    def __init__(self, title, publisher, publication_year, issue_number, category):
         super().__init__(title, publisher, publication_year)
         self.issue_number = issue_number
+        self.category = category
     
     def display_info(self):
-        return f"{super().display_info()}, Issue Number: {self.issue_number}"
+        return f"{super().display_info()}, Category: {self.category}, Issue Number: {self.issue_number}, Popularity: {self.getPopularity()}"
 
 print()
-book = Book("Harry Potter", "J.K. Rowling", 1997, 500)
+book = Book("Harry Potter", "J.K. Rowling", 1997, 500, "Fiction/Fantasy")
 dvd = DVD("Inception", "Christopher Nolan", 2010, 150, "Sci-Fi")
-magazine = Magazine("National Geographic", "National Geographic Society", 1888, 1)
+magazine = Magazine("National Geographic", "National Geographic Society", 1888, 1, "Science")
 print("Exercitiul 6:")
+book.check_out()
+book.return_item()
+book.check_out()
+book.return_item()
 print(book.display_info())
 print(book.check_out())
 print(book.check_out())
 print(book.return_item())
 print()
+dvd.check_out()
+dvd.return_item()
+dvd.check_out()
+dvd.return_item()
+dvd.check_out()
+dvd.return_item()
 print(dvd.display_info())
 print(dvd.check_out())
 print(dvd.return_item())
