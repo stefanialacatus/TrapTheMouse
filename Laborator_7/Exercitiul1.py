@@ -19,6 +19,7 @@ def ex_1():
                     file_path = os.path.join(root, file)
                     try:
                         with open(file_path, 'r') as f:
+                            print()
                             print(f"Continutul fisierului {file_path}:\n")
                             print(f.read())
                             print("-" * 50)
