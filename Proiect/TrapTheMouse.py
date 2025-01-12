@@ -94,8 +94,65 @@ class Game:
         self.mouse_player = False
         self.tiles = {}
         self.message_label = tk.Label(self.root, text="",bg="red", font=("Arial", 12, "bold"), fg="blue", anchor="center")
-        if adversar == "player":
+        self.root.bind("<ButtonPress-1>", self.place_tile)
+        if self.adversar=="player":
+            self.level=0
+        if self.adversar=="calculator":
+            self.choose_level()
+
+
+    def choose_level(self):
+        self.canvas.delete("all")
+        self.canvas.create_text(
+            300, 75, 
+            text="Choose a dificulty level", 
+            font=("Arial", 24, "bold"), 
+            fill="black",
+        )
+        self.canvas.create_window(300,200, window=tk.Button(self.root, text="EASY", command=self.easy_lvl, bg="lightblue", fg="black", font=("Arial", 16, "bold"), relief="raised", width=40, height=2))
+        self.canvas.create_window(300,300, window=tk.Button(self.root, text="MEDIUM", command=self.medium_lvl, bg="blue", fg="white", font=("Arial", 16, "bold"), relief="raised", width=40, height=2))
+        self.canvas.create_window(300,400, window=tk.Button(self.root, text="HARD", command=self.hard_lvl, bg="darkblue", fg="white", font=("Arial", 16, "bold"), relief="raised", width=40, height=2))
+
+    def easy_lvl(self):
+        print("Ai ales nivelul 1: easy")
+        self.level=1
+        self.drawBoard()
+    def medium_lvl(self):
+        print("Ai ales nivelul 2: medium")
+        self.level=2
+        self.drawBoard()
+    def hard_lvl(self):
+        print("Ai ales nivelul 3: hard")
+        self.level=3
+        self.drawBoard()
+
+    def ai_easy(self):
+        mouse_neighbors = get_neighbors(self.prev_mouse_coords)
+        available_moves=[k for k in self.tiles.keys() if (self.tiles[k][1], self.tiles[k][2]) in mouse_neighbors and self.tiles[k][0]=="white"]
+        print(available_moves)
+        move = random.sample(available_moves, 1)[0]
+        print(move)
+        x, y = move
+        if hasattr(self, 'mouse_image_id'):
+            self.canvas.delete(self.mouse_image_id)
+        mouse = Image.open("mouse.png")
+        mouse = mouse.resize((45, 45), Image.LANCZOS)
+        mouse_tk = ImageTk.PhotoImage(mouse)
+        label = tk.Label(image=mouse_tk)
+        label.image = mouse_tk
+        self.mouse_image_id = self.canvas.create_image(x, y, anchor=tk.CENTER, image=mouse_tk)
+        self.canvas.itemconfig(self.mouse_image_id, tags="clip")
+        self.canvas.lift("clip")
+        self.tiles[(x, y)] = ("mouse", self.tiles[(x, y)][1], self.tiles[(x, y)][2])
+        draw_hexagon(self.canvas, self.prev_mouse[0], self.prev_mouse[1], 30, color="white", outline="black")
+        self.tiles[self.prev_mouse] = ("white", self.prev_mouse_coords[0], self.prev_mouse_coords[1])
+        print(f"Moved mouse to {self.tiles[(x, y)][1]}, {self.tiles[(x, y)][2]}")
+        self.prev_mouse = (x, y)
+        self.prev_mouse_coords = (self.tiles[(x, y)][1], self.tiles[(x, y)][2])
+        self.mouse_player = False
+        if not self.game_over():
             self.root.bind("<ButtonPress-1>", self.place_tile)
+
 
     def place_tile(self, event):
         for key in self.tiles:
@@ -109,8 +166,12 @@ class Game:
                     if self.game_over():
                         break
                     else:
-                        self.root.bind("<ButtonPress-1>", self.move_mouse)
-                        break
+                        if self.level==0:
+                            self.root.bind("<ButtonPress-1>", self.move_mouse)
+                            break
+                        if self.level==1:
+                            self.ai_easy()
+                            break
                 elif self.tiles[key][0] != "white":
                     print(f"Exista deja o piesa la {x}, {y}")
                     break
@@ -132,7 +193,7 @@ class Game:
                         self.mouse_image_id = self.canvas.create_image(x, y, anchor=tk.CENTER, image=mouse_tk)
                         self.canvas.itemconfig(self.mouse_image_id, tags="clip")
                         self.canvas.lift("clip")
-                        self.tiles[key] = "mouse"
+                        self.tiles[key] = ("mouse", self.tiles[key][1], self.tiles[key][2])
                         draw_hexagon(self.canvas, self.prev_mouse[0], self.prev_mouse[1], 30, color="white", outline="black")
                         self.tiles[self.prev_mouse] = ("white", self.prev_mouse_coords[0], self.prev_mouse_coords[1])
                         print(f"Moved mouse to {row}, {col}")
@@ -206,7 +267,6 @@ class Game:
         print(self.tiles)
 
     def run(self):
-        self.drawBoard()
         self.root.mainloop()
 
 if __name__ == "__main__":
