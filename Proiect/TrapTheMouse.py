@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 import sys
 from math import sin, cos, pi
 import random
+from collections import deque
 
 # Function to draw a hexagon
 def draw_hexagon(canvas, x, y, r, color="white", outline="black"):
@@ -153,6 +154,48 @@ class Game:
         if not self.game_over():
             self.root.bind("<ButtonPress-1>", self.place_tile)
 
+    def ai_medium(self):
+        queue=deque([self.prev_mouse_coords])
+        came_from={self.prev_mouse_coords:None}
+        path = []
+        while queue:
+            print(queue)
+            current=queue.pop()
+            print(current)
+            if current[0]==0 or current[0]==10 or current[1]==0 or current[1]==10:
+                path =[]
+                while current:
+                    path.append(current)
+                    current=came_from[current]
+                path.reverse()
+            if current is not None:
+                for next in get_neighbors(current):
+                    if next not in came_from and any(k for k in self.tiles.keys() if self.tiles[k][1]==next[0] and self.tiles[k][2]==next[1] and self.tiles[k][0]=="white"):
+                        queue.append(next)
+                        came_from[next]=current
+        print(path)
+        move=[k for k in self.tiles.keys() if self.tiles[k][1]==path[1][0] and self.tiles[k][2]==path[1][1]][0]
+        x, y = move
+        if hasattr(self, 'mouse_image_id'):
+            self.canvas.delete(self.mouse_image_id)
+        mouse = Image.open("mouse.png")
+        mouse = mouse.resize((45, 45), Image.LANCZOS)
+        mouse_tk = ImageTk.PhotoImage(mouse)
+        label = tk.Label(image=mouse_tk)
+        label.image = mouse_tk
+        self.mouse_image_id = self.canvas.create_image(x, y, anchor=tk.CENTER, image=mouse_tk)
+        self.canvas.itemconfig(self.mouse_image_id, tags="clip")
+        self.canvas.lift("clip")
+        self.tiles[(x, y)] = ("mouse", self.tiles[(x, y)][1], self.tiles[(x, y)][2])
+        draw_hexagon(self.canvas, self.prev_mouse[0], self.prev_mouse[1], 30, color="white", outline="black")
+        self.tiles[self.prev_mouse] = ("white", self.prev_mouse_coords[0], self.prev_mouse_coords[1])
+        print(f"Moved mouse to {self.tiles[(x, y)][1]}, {self.tiles[(x, y)][2]}")
+        self.prev_mouse = (x, y)
+        self.prev_mouse_coords = (self.tiles[(x, y)][1], self.tiles[(x, y)][2])
+        self.mouse_player = False
+        if not self.game_over():
+            self.root.bind("<ButtonPress-1>", self.place_tile)
+
 
     def place_tile(self, event):
         for key in self.tiles:
@@ -171,6 +214,12 @@ class Game:
                             break
                         if self.level==1:
                             self.ai_easy()
+                            break
+                        if self.level==2:
+                            self.ai_medium()
+                            break
+                        if self.level==3:
+                            self.ai_hard()
                             break
                 elif self.tiles[key][0] != "white":
                     print(f"Exista deja o piesa la {x}, {y}")
