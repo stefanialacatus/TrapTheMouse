@@ -6,22 +6,22 @@ import random
 
 # Function to draw a hexagon
 def draw_hexagon(canvas, x, y, r, color="white", outline="black"):
-    points = []
+    points=[]
     for i in range(6):
-        angle = (pi / 3) * i
-        points.append((x + r * cos(angle), y + r * sin(angle)))
-    flat_points = [coord for point in points for coord in point]
+        angle=(pi/3)*i
+        points.append((x+r*cos(angle), y+r*sin(angle)))
+    flat_points=[coord for point in points for coord in point]
     canvas.create_polygon(flat_points, fill=color, outline=outline)
 
 def is_point_in_hexagon(x, y, hex_x, hex_y, r):
-    dx = abs(x - hex_x) / r
-    dy = abs(y - hex_y) / r
-    return dy <= 0.5 and dx <= 1 - dy / 2 or dy <= 1 and dx <= 0.5
+    dx=abs(x-hex_x)/r
+    dy=abs(y-hex_y)/r
+    return dy<=0.5 and dx<=1-dy/2 or dy<=1 and dx<= 0.5
 
 def get_neighbors(hex_coords):
     x, y = hex_coords
     neighbors = []
-    if x == 0 and y == 0:
+    if x == 0 and y == 0: 
         neighbors.append((x, y + 1))
         neighbors.append((x + 1, y))
     elif x == 0 and y == 10:
@@ -58,7 +58,6 @@ def get_neighbors(hex_coords):
         neighbors.append((x + 1, y))
         neighbors.append((x, y - 1))
         neighbors.append((x - 1, y - 1))
-        neighbors.append((x + 1, y + 1))
         neighbors.append((x - 1, y + 1))
         neighbors.append((x, y + 1))
     elif x == 0 and y > 0 and y % 2 == 0:
@@ -73,8 +72,13 @@ def get_neighbors(hex_coords):
         neighbors.append((x, y + 1))
         neighbors.append((x - 1, y))
         neighbors.append((x, y - 1))
-        neighbors.append((x - 1, y - 1))
+        neighbors.append((x - 1, y - 1))	
         neighbors.append((x - 1, y + 1))
+    elif x > 0 and y == 10:
+        neighbors.append((x - 1, y))
+        neighbors.append((x + 1, y))
+        neighbors.append((x, y - 1))
+        neighbors.append((x - 1, y - 1))
     return neighbors
 
 
@@ -89,8 +93,7 @@ class Game:
         self.running = True
         self.mouse_player = False
         self.tiles = {}
-        self.message_label = tk.Label(self.root, text="", font=("Arial", 12), fg="blue")
-        self.message_label.pack(pady=5)
+        self.message_label = tk.Label(self.root, text="",bg="red", font=("Arial", 12, "bold"), fg="blue", anchor="center")
         if adversar == "player":
             self.root.bind("<ButtonPress-1>", self.place_tile)
 
@@ -104,8 +107,7 @@ class Game:
                     print(f"Placed tile at {x}, {y}, {self.tiles[key]}")
                     self.mouse_player = True
                     if self.game_over():
-                            self.root.unbind("<ButtonPress-1>")
-                            break
+                        break
                     else:
                         self.root.bind("<ButtonPress-1>", self.move_mouse)
                         break
@@ -138,7 +140,6 @@ class Game:
                         self.prev_mouse_coords = (row, col)
                         self.mouse_player = False
                         if self.game_over():
-                            self.root.unbind("<ButtonPress-1>")
                             break
                         else:
                             self.root.bind("<ButtonPress-1>", self.place_tile)
@@ -148,20 +149,23 @@ class Game:
                     break
 
     def game_over(self):
-        for key in self.tiles:
-            c, x, y = self.tiles[key][0], self.tiles[key][1], self.tiles[key][2]
-            if c == "mouse" and (y==0 or y==10 or x==0 or x==10):
-                print("Soarecele a scapat")
-                self.message_label.config(text="Soarecele a scapat")
-                self.root.quit()
-                return True
-            elif c == "red":
-                neighbors = get_neighbors((x, y))
-                if all(self.tiles.get((nx, ny), ("white",))[0] == "red" for nx, ny in neighbors):
-                    print("Soarecele a fost prins")
-                    self.message_label.config(text="Soarecele a fost prins")
-                    self.root.quit()
-                    return True
+        mouse_pos=self.prev_mouse_coords
+        if mouse_pos[0]==0 or mouse_pos[0]==10 or mouse_pos[1]==0 or mouse_pos[1]==10:
+            print("Soarecele a castigat!")
+            self.message_label.config(text="Soarecele a castigat!")
+            self.message_label.pack(side="top", fill="x")
+            self.root.unbind("<ButtonPress-1>")
+            self.root.after(5000, self.root.destroy)
+            return True
+        mouse_neighbors = get_neighbors(mouse_pos)
+        if all(self.tiles.get(next((key for key in self.tiles if self.tiles[key][1] == nx and self.tiles[key][2] == ny), None),
+                               ("white",))[0] == "red" for nx, ny in mouse_neighbors):
+            print("Soarecele a fost prins!")
+            self.message_label.config(text="Soarecele a fost prins!")
+            self.message_label.pack(side="top", fill="x")
+            self.root.unbind("<ButtonPress-1>")
+            self.root.after(5000, self.root.destroy)
+            return True
         return False
             
 
