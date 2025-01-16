@@ -88,7 +88,7 @@ class Game:
     def __init__(self, adversar, width=600, height=700, title="Trap The Mouse"):
         self.adversar = adversar
         self.root = tk.Tk()
-        self.root.title(f"{title} - {adversar}")
+        self.root.title(f"{title} : playing with {adversar}")
         self.canvas = tk.Canvas(self.root, width=width, height=height, bg="green")
         self.canvas.pack()
         self.running = True
@@ -98,6 +98,7 @@ class Game:
         self.root.bind("<ButtonPress-1>", self.place_tile)
         if self.adversar=="player":
             self.level=0
+            self.draw_board()
         if self.adversar=="calculator":
             self.choose_level()
 
@@ -117,15 +118,15 @@ class Game:
     def easy_lvl(self):
         print("Ai ales nivelul 1: easy")
         self.level=1
-        self.drawBoard()
+        self.draw_board()
     def medium_lvl(self):
         print("Ai ales nivelul 2: medium")
         self.level=2
-        self.drawBoard()
+        self.draw_board()
     def hard_lvl(self):
         print("Ai ales nivelul 3: hard")
         self.level=3
-        self.drawBoard()
+        self.draw_board()
 
     def ai_easy(self):
         mouse_neighbors = get_neighbors(self.prev_mouse_coords)
@@ -154,6 +155,7 @@ class Game:
         if not self.game_over():
             self.root.bind("<ButtonPress-1>", self.place_tile)
 
+    #algoritmul bfs
     def ai_medium(self):
         queue=deque([self.prev_mouse_coords])
         came_from={self.prev_mouse_coords:None}
@@ -173,6 +175,8 @@ class Game:
                     if next not in came_from and any(k for k in self.tiles.keys() if self.tiles[k][1]==next[0] and self.tiles[k][2]==next[1] and self.tiles[k][0]=="white"):
                         queue.append(next)
                         came_from[next]=current
+        if not path:
+            self.ai_easy()
         print(path)
         move=[k for k in self.tiles.keys() if self.tiles[k][1]==path[1][0] and self.tiles[k][2]==path[1][1]][0]
         x, y = move
@@ -195,6 +199,73 @@ class Game:
         self.mouse_player = False
         if not self.game_over():
             self.root.bind("<ButtonPress-1>", self.place_tile)
+
+    #algoritmul a*
+    def ai_hard(self):
+        def heuristic(a, b):
+            return abs(a[0] - b[0]) + abs(a[1] - b[1])
+        
+        open_set = set([self.prev_mouse_coords])
+        closed_set = set()
+        came_from = {}
+        g_score = {node: float('inf') for node in self.tiles.keys()}
+        g_score[self.prev_mouse_coords] = 0
+        f_score = {node: float('inf') for node in self.tiles.keys()}
+        f_score[self.prev_mouse_coords] = heuristic(self.prev_mouse_coords, (0, 0))
+
+        # Check if any neighbor is at the edge
+        edge_positions = [(0, 0), (10, 0), (0, 10), (10, 10)]
+
+        while open_set:
+            current = min(open_set, key=lambda x: f_score[x])
+            if current in edge_positions:
+                path = [current]
+                while current in came_from:
+                    current = came_from[current]
+                    path.append(current)
+                path.reverse()
+                break
+            
+            open_set.remove(current)
+            closed_set.add(current)
+
+            for neighbor in get_neighbors(current):
+                if neighbor in closed_set or not any(k for k in self.tiles.keys() if self.tiles[k][1] == neighbor[0] and self.tiles[k][2] == neighbor[1] and self.tiles[k][0] == "white"):
+                    continue
+
+                tentative_g_score = g_score[current] + 1  # Assuming uniform cost for movement
+                if neighbor not in open_set or tentative_g_score < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, (0, 0))
+                    if neighbor not in open_set:
+                        open_set.add(neighbor)
+        else:
+            self.ai_easy()
+
+        if path:
+            move = next(k for k in self.tiles.keys() if self.tiles[k][1] == path[1][0] and self.tiles[k][2] == path[1][1])
+            x, y = move
+            if hasattr(self, 'mouse_image_id'):
+                self.canvas.delete(self.mouse_image_id)
+            mouse = Image.open("mouse.png")
+            mouse = mouse.resize((45, 45), Image.LANCZOS)
+            mouse_tk = ImageTk.PhotoImage(mouse)
+            label = tk.Label(image=mouse_tk)
+            label.image = mouse_tk
+            self.mouse_image_id = self.canvas.create_image(x, y, anchor=tk.CENTER, image=mouse_tk)
+            self.canvas.itemconfig(self.mouse_image_id, tags="clip")
+            self.canvas.lift("clip")
+            self.tiles[(x, y)] = ("mouse", self.tiles[(x, y)][1], self.tiles[(x, y)][2])
+            draw_hexagon(self.canvas, self.prev_mouse[0], self.prev_mouse[1], 30, color="white", outline="black")
+            self.tiles[self.prev_mouse] = ("white", self.prev_mouse_coords[0], self.prev_mouse_coords[1])
+            print(f"Moved mouse to {self.tiles[(x, y)][1]}, {self.tiles[(x, y)][2]}")
+            self.prev_mouse = (x, y)
+            self.prev_mouse_coords = (self.tiles[(x, y)][1], self.tiles[(x, y)][2])
+            self.mouse_player = False
+            if not self.game_over():
+                self.root.bind("<ButtonPress-1>", self.place_tile)
+
 
 
     def place_tile(self, event):
@@ -288,7 +359,7 @@ class Game:
             draw_hexagon(self.canvas, x, y, 30, color="red", outline="black")
             self.tiles[(x, y)] = ("red", self.tiles[(x, y)][1], self.tiles[(x, y)][2])
 
-    def drawBoard(self):
+    def draw_board(self):
         self.canvas.delete("all")
         vertical_spacing = 3**0.5 * 30
         horizontal_spacing = 1.5 * 30
