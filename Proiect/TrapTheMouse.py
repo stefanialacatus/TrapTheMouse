@@ -319,7 +319,7 @@ class Game:
 
         while open_set:
             current = min(open_set, key=lambda x: f_score[x])
-            if current in edges:
+            if current[0]==0 or current[0]==10 or current[1]==0 or current[1]==10:
                 path = [current]
                 while current in came_from:
                     current = came_from[current]
