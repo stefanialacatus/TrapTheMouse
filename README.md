@@ -22,4 +22,4 @@ Player 2 controls the mouse and tries to escape to an edge.
 ### Algorithms Used:
 - Random movement (Easy AI)
 - Breadth-First Search (BFS) (Medium AI)
-- A Search Algorithm* with heuristics (Hard AI)
+- A* Search Algorithm with heuristics (Hard AI)
