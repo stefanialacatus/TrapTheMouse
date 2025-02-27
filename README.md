@@ -5,11 +5,11 @@ Trap the Mouse is a strategy-based game built in Python with a graphical interfa
 ### 1. Single-Player Mode (vs AI) 🧠
 In this mode, the player sets obstacles on the board while an AI-controlled mouse tries to escape. The AI has three difficulty levels:
 
-Easy 🟢: The mouse moves randomly.
+🟢 Easy : The mouse moves randomly.
 
-Medium 🟡: The mouse uses the BFS (Breadth-First Search) algorithm to find a path to the edge.
+🟡 Medium : The mouse uses the BFS (Breadth-First Search) algorithm to find a path to the edge.
 
-Hard 🔴: The mouse uses A* Search Algorithm with heuristics to navigate obstacles and find the best escape route.
+🔴 Hard : The mouse uses A* Search Algorithm with heuristics to navigate obstacles and find the best escape route.
 
 ### 2. Two-Player Mode 👥
 Player 1 places obstacles to trap the mouse.
